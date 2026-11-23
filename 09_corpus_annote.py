@@ -83,6 +83,18 @@ def ecrire_json(args, images, pipe, classes):
     with open(chemin_json, "w", encoding="utf-8") as f:
         json.dump(donnees, f, ensure_ascii=False, indent=1)
     print(f"Fichier JSON : {os.path.abspath(chemin_json)}")
+    ecrire_soumission(donnees, os.path.join(args.out, "soumission.json"))
+
+
+def ecrire_soumission(donnees, chemin):
+    """Format demandé par le site de validation du prof :
+    {"1.jpg": [{"class": "A2", "coordinates": {"xmin":..,"ymin":..,"xmax":..,"ymax":..}}, ...], ...}
+    Toutes les images sont présentes, même celles sans avion (liste vide)."""
+    soumission = {im["image"]: [{"class": a["classe"], "coordinates": a["boite"]} for a in im["avions"]]
+                  for im in donnees["images"]}
+    with open(chemin, "w", encoding="utf-8") as f:
+        json.dump(soumission, f, indent=2)
+    print(f"Fichier à déposer sur le site de validation : {os.path.abspath(chemin)}")
 
 
 def main():
