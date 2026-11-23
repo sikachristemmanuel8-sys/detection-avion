@@ -1,0 +1,64 @@
+{
+  "nb_images": 1331,
+  "nb_avions": 7870,
+  "nb_classes": 20,
+  "avions_par_classe": {
+    "A1": 554,
+    "A2": 736,
+    "A3": 316,
+    "A4": 179,
+    "A5": 435,
+    "A6": 107,
+    "A7": 191,
+    "A8": 365,
+    "A9": 475,
+    "A10": 368,
+    "A11": 151,
+    "A12": 240,
+    "A13": 561,
+    "A14": 659,
+    "A15": 200,
+    "A16": 785,
+    "A17": 439,
+    "A18": 160,
+    "A19": 519,
+    "A20": 430
+  },
+  "ratio_desequilibre_max_min": 7.34,
+  "avions_par_image": {
+    "min": 1,
+    "moyenne": 5.91,
+    "mediane": 5.0,
+    "max": 50
+  },
+  "tailles_images_top5": {
+    "800x800": 1174,
+    "734x734": 4,
+    "736x736": 3,
+    "751x751": 3,
+    "749x749": 2
+  },
+  "largeur_boites_px": {
+    "min": 28.0,
+    "p5": 58.0,
+    "mediane": 100.0,
+    "p95": 184.0,
+    "max": 520.0
+  },
+  "hauteur_boites_px": {
+    "min": 31.0,
+    "p5": 55.0,
+    "mediane": 102.0,
+    "p95": 187.0,
+    "max": 566.0
+  },
+  "boites_tronquees": 331,
+  "controles": {
+    "xml_sans_image": [
+      "3 - Copie.xml"
+    ],
+    "images_sans_xml": [],
+    "taille_xml_differente_de_l_image": [],
+    "boites_invalides": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+ "arch": "resnet50",
+ "seuil": 0.95,
+ "iou_nms": 0.2,
+ "inclusion": 0.5,
+ "fusion": true,
+ "precision": 0.8431528662420382,
+ "rappel": 0.8966977138018628,
+ "f1": 0.8691013541239229,
+ "bonnes_detections": 1059,
+ "fausses_alarmes": 197,
+ "avions_manques": 122,
+ "secondes_par_image": 5.58
+}

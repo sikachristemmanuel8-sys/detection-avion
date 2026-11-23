@@ -1,0 +1,7 @@
+Détecteur : fenêtre glissante + resnet18 avion/fond (entrée 96px)
+Post-traitement : NMS IoU 0.2, suppression des boîtes incluses : oui (> 50%), fusion des fenêtres : oui
+Seuil de score choisi sur la validation : 0.95  (val : P 0.857 R 0.918 F1 0.886)
+TEST (269 images, 1181 avions, détection correcte si IoU >= 0.5)
+  précision 0.872   rappel 0.914   F1 0.893
+  bonnes détections 1080   fausses alarmes 158   avions manqués 101
+  temps de détection : 1.79 s/image

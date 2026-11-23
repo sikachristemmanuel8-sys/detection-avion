@@ -1,0 +1,10 @@
+Modèle : resnet18 (meilleure époque 11, F1-macro val 0.997)
+TEST  accuracy 0.997   F1-macro 0.996
+
+classe  précision   rappel     F1    nb
+ avion      0.994    0.995  0.994  2355
+  fond      0.998    0.998  0.998  6561
+
+Confusions les plus fréquentes (vraie -> prédite : nb) :
+  fond -> avion : 14
+  avion -> fond : 12

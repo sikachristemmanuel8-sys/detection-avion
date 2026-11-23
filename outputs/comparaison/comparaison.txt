@@ -1,0 +1,15 @@
+                                                   ResNet18   ResNet50
+CLASSIFICATION (20 modèles d'avions, test)
+  Accuracy                                            97.9%      98.2%
+  F1-macro                                            97.3%      98.0%
+  Paramètres                                         11.2 M     23.5 M
+  Durée d'entraînement                             21.8 min        n/a
+
+DÉTECTION (fenêtre glissante, images de test, IoU >= 0.5)
+  Précision                                           87.2%      84.3%
+  Rappel                                              91.4%      89.7%
+  F1                                                  89.3%      86.9%
+  Fausses alarmes                                       158        197
+  Avions manqués                                        101        122
+  Temps par image                                    1.79 s     5.58 s
+  Durée d'entraînement                             18.0 min   19.2 min

@@ -1,0 +1,14 @@
+{
+ "arch": "resnet18",
+ "classes": [
+  "avion",
+  "fond"
+ ],
+ "test_acc": 0.9970838941229251,
+ "test_f1_macro": 0.9962502329288998,
+ "val_f1_macro": 0.9968742940588602,
+ "meilleure_epoque": 11,
+ "epoques": 12,
+ "duree_entrainement_min": 18.0,
+ "parametres_millions": 11.2
+}

@@ -1,0 +1,14 @@
+{
+ "arch": "resnet18",
+ "seuil": 0.95,
+ "iou_nms": 0.2,
+ "inclusion": 0.5,
+ "fusion": true,
+ "precision": 0.8723747980613893,
+ "rappel": 0.9144792548687553,
+ "f1": 0.8929309632079371,
+ "bonnes_detections": 1080,
+ "fausses_alarmes": 158,
+ "avions_manques": 101,
+ "secondes_par_image": 1.79
+}

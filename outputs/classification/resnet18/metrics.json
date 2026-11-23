@@ -1,0 +1,32 @@
+{
+ "arch": "resnet18",
+ "classes": [
+  "A1",
+  "A2",
+  "A3",
+  "A4",
+  "A5",
+  "A6",
+  "A7",
+  "A8",
+  "A9",
+  "A10",
+  "A11",
+  "A12",
+  "A13",
+  "A14",
+  "A15",
+  "A16",
+  "A17",
+  "A18",
+  "A19",
+  "A20"
+ ],
+ "test_acc": 0.97883149872989,
+ "test_f1_macro": 0.9730043085532053,
+ "val_f1_macro": 0.9652716917700461,
+ "meilleure_epoque": 20,
+ "epoques": 25,
+ "duree_entrainement_min": 21.8,
+ "parametres_millions": 11.2
+}

@@ -1,0 +1,36 @@
+Images annotées : 1331
+Avions annotés  : 7870  (20 classes)
+Avions/image    : {'min': 1, 'moyenne': 5.91, 'mediane': 5.0, 'max': 50}
+Déséquilibre    : la classe la plus fréquente a 7.34x plus d'exemples que la plus rare
+Taille images   : {'800x800': 1174, '734x734': 4, '736x736': 3, '751x751': 3, '749x749': 2}
+Largeur boîtes  : {'min': 28.0, 'p5': 58.0, 'mediane': 100.0, 'p95': 184.0, 'max': 520.0}
+Hauteur boîtes  : {'min': 31.0, 'p5': 55.0, 'mediane': 102.0, 'p95': 187.0, 'max': 566.0}
+Boîtes tronquées (bord d'image) : 331
+
+Avions par classe :
+    A1 :  554
+    A2 :  736
+    A3 :  316
+    A4 :  179
+    A5 :  435
+    A6 :  107
+    A7 :  191
+    A8 :  365
+    A9 :  475
+   A10 :  368
+   A11 :  151
+   A12 :  240
+   A13 :  561
+   A14 :  659
+   A15 :  200
+   A16 :  785
+   A17 :  439
+   A18 :  160
+   A19 :  519
+   A20 :  430
+
+Contrôles :
+  xml_sans_image : ['3 - Copie.xml']
+  images_sans_xml : aucun
+  taille_xml_differente_de_l_image : aucun
+  boites_invalides : aucun
