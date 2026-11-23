@@ -123,7 +123,79 @@ class Pipeline:
         return sorted(res, key=lambda d: (d["boite"][1], d["boite"][0]))   # de haut en bas
 
 
+def comparer(detections, vrais, seuil_iou=0.5):
+    """Compare les prédictions à la vérité terrain (liste de (classe, [x0,y0,x1,y1])).
+    Même règle que l'évaluation : par score décroissant, chaque détection prend
+    le vrai avion libre qu'elle recouvre le plus, s'il a un IoU >= seuil_iou.
+    Retourne (verdicts : un par détection parmi 'correct' / 'mauvaise classe' /
+    'fausse alarme', vraie classe associée (ou None) ; trouves : un booléen par vrai avion)."""
+    from torchvision.ops import box_iou
+    verdicts = [("fausse alarme", None)] * len(detections)
+    trouves = [False] * len(vrais)
+    if detections and vrais:
+        ious = box_iou(torch.tensor([d["boite"] for d in detections], dtype=torch.float32),
+                       torch.tensor([b for _, b in vrais], dtype=torch.float32))
+        for i in sorted(range(len(detections)), key=lambda k: -detections[k]["score"]):
+            v = ious[i].clone()
+            v[torch.tensor(trouves)] = -1
+            j = int(v.argmax())
+            if v[j] >= seuil_iou:
+                trouves[j] = True
+                classe_vraie = vrais[j][0]
+                verdicts[i] = ("correct" if detections[i]["classe"] == classe_vraie else "mauvaise classe", classe_vraie)
+    return verdicts, trouves
+
+
+COULEURS_VERDICT = {"correct": "#2ca02c", "mauvaise classe": "#ff7f0e", "fausse alarme": "#d62728",
+                    "manqué": "#ffd700"}
+
+
+def _etiquette(d, x0, y0, txt, c, f):
+    l, t, r, b = d.textbbox((x0, y0), txt, font=f)
+    ty = y0 - (b - t) - 4 if y0 - (b - t) - 4 >= 0 else y0
+    d.rectangle((x0, ty, x0 + (r - l) + 6, ty + (b - t) + 4), fill=c)
+    r_, g_, b_ = (int(c[i:i + 2], 16) for i in (1, 3, 5))
+    clair = 0.299 * r_ + 0.587 * g_ + 0.114 * b_ > 140
+    d.text((x0 + 3, ty + 1), txt, fill="black" if clair else "white", font=f)
+
+
+def dessiner_verite(img, vrais, epaisseur=3):
+    """Dessine la vérité terrain (vrais cadres et vraies classes, une couleur par classe)."""
+    img = img.convert("RGB").copy()
+    d = ImageDraw.Draw(img)
+    f = police(max(12, img.width // 60))
+    for classe, (x0, y0, x1, y1) in vrais:
+        d.rectangle((x0, y0, x1, y1), outline=couleur(classe), width=epaisseur)
+        _etiquette(d, x0, y0, classe, couleur(classe), f)
+    return img
+
+
+def dessiner_comparaison(img, detections, verdicts, vrais, trouves, epaisseur=3):
+    """Prédictions colorées selon le verdict : vert = correct, orange = mauvaise
+    classe, rouge = fausse alarme ; en jaune les vrais avions manqués."""
+    img = img.convert("RGB").copy()
+    d = ImageDraw.Draw(img)
+    f = police(max(12, img.width // 60))
+    for (classe, (x0, y0, x1, y1)), ok in zip(vrais, trouves):
+        if not ok:
+            d.rectangle((x0, y0, x1, y1), outline=COULEURS_VERDICT["manqué"], width=epaisseur)
+            _etiquette(d, x0, y0, f"{classe} manqué", COULEURS_VERDICT["manqué"], f)
+    for det, (verdict, vraie) in zip(detections, verdicts):
+        x0, y0, x1, y1 = det["boite"]
+        c = COULEURS_VERDICT[verdict]
+        d.rectangle((x0, y0, x1, y1), outline=c, width=epaisseur)
+        txt = {"correct": det["classe"], "mauvaise classe": f"{det['classe']} (vrai {vraie})",
+               "fausse alarme": f"{det['classe']} ?"}[verdict]
+        _etiquette(d, x0, y0, txt, c, f)
+    return img
+
+
 def police(taille):
+    try:   # police DejaVu fournie avec matplotlib : elle gère les accents (é de « manqué »)
+        import matplotlib
+        return ImageFont.truetype(os.path.join(matplotlib.get_data_path(), "fonts", "ttf", "DejaVuSans.ttf"), taille)
+    except Exception:
+        pass
     try:
         return ImageFont.load_default(size=taille)
     except TypeError:   # anciennes versions de Pillow
