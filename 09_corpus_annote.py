@@ -7,9 +7,14 @@ Pour chaque image de test : détection + classification, puis on enregistre
 et une évaluation de la chaîne complète : un avion est « correct » si une
 détection le recouvre (IoU >= 0.5) ET a la bonne classe.
 
+et detections.csv (une ligne par avion détecté, toutes images confondues).
+Si le dossier ne contient pas d'annotations (corpus d'évaluation), seules les
+prédictions sont produites. Si le programme est interrompu, le relancer avec
+les mêmes options reprend là où il s'était arrêté.
+
 Sortie : outputs/corpus_annote/ (+ corpus_annote.zip à mettre en lien dans le rapport)
 
-Usage : python 09_corpus_annote.py [--images data/images_detection/test]
+Usage : python 09_corpus_annote.py [--images data/images_detection/test] [--out outputs/corpus_annote]
 """
 import argparse
 import glob
@@ -56,15 +61,32 @@ def main():
 
     pipe = Pipeline(detecteur=args.detecteur, classifieur=args.classifieur)
     os.makedirs(args.out, exist_ok=True)
-    images = sorted(glob.glob(os.path.join(args.images, "*.jpg")))
+    # toutes les images du dossier (on ignore les fichiers cachés, ex. ceux créés par macOS)
+    images = sorted(f for f in glob.glob(os.path.join(args.images, "*"))
+                    if f.lower().endswith((".jpg", ".jpeg", ".png")) and not os.path.basename(f).startswith("."))
+    # reprise : les images déjà traitées (leur .xml existe) sont sautées
+    deja = [c for c in images if os.path.exists(os.path.join(args.out, os.path.splitext(os.path.basename(c))[0] + ".xml"))]
+    deja_set = set(deja)
+    a_faire = [c for c in images if c not in deja_set]
+    if deja:
+        print(f"Reprise : {len(deja)} images déjà traitées, il en reste {len(a_faire)}")
+    csv_path = os.path.join(args.out, "detections.csv")
+    if not os.path.exists(csv_path):
+        with open(csv_path, "w", encoding="utf-8") as f:
+            f.write("image,classe,confiance_classe,score_avion,xmin,ymin,xmax,ymax\n")
     n_gt = n_det = n_bonne_boite = n_correct = 0
     erreurs_classe = Counter()
     t0 = time.time()
-    for n, chemin in enumerate(images, 1):
+    for n, chemin in enumerate(a_faire, 1):
         nom = os.path.splitext(os.path.basename(chemin))[0]
         img = Image.open(chemin).convert("RGB")
         dets = pipe.analyser(img)
         dessiner(img, dets).save(os.path.join(args.out, nom + ".jpg"), quality=92)
+        with open(csv_path, "a", encoding="utf-8") as f:
+            for d in dets:
+                f.write(f"{os.path.basename(chemin)},{d['classe']},{d['proba']:.4f},{d['score']:.4f},"
+                        + ",".join(str(v) for v in d["boite"]) + "\n")
+        # le .xml est écrit en dernier : s'il existe, l'image est entièrement traitée
         ecrire_xml(os.path.join(args.out, nom + ".xml"), os.path.basename(chemin), img, dets)
 
         xml_vrai = os.path.join(args.images, nom + ".xml")   # vraies annotations, si elles existent
@@ -91,11 +113,18 @@ def main():
                             erreurs_classe[f"{vrais[j].label} -> {dets[k]['classe']}"] += 1
             n_gt += len(gt)
         n_det += len(dets)
-        if n % 20 == 0 or n == len(images):
-            print(f"  {n}/{len(images)} images ({(time.time() - t0) / n:.1f} s/image)")
+        if n % 20 == 0 or n == len(a_faire):
+            print(f"  {len(deja) + n}/{len(images)} images ({(time.time() - t0) / n:.1f} s/image)")
 
-    lignes = [f"Corpus annoté : {len(images)} images, {n_det} avions détectés",
-              f"Détecteur {args.detecteur} (seuil {pipe.seuil}) + classifieur {args.classifieur}"]
+    # bilan sur tout le corpus (y compris les images d'une session précédente), à partir du CSV
+    with open(csv_path, encoding="utf-8") as f:
+        classes = Counter(l.split(",")[1] for l in f.read().splitlines()[1:] if l)
+    par_classe = ", ".join(f"{c} : {n}" for c, n in sorted(classes.items(), key=lambda kv: int(kv[0][1:])))
+    lignes = [f"Corpus annoté : {len(images)} images, {sum(classes.values())} avions détectés",
+              f"Détecteur {args.detecteur} (seuil {pipe.seuil}) + classifieur {args.classifieur}",
+              f"Avions par classe : {par_classe}"]
+    if n_gt and deja:
+        lignes += ["(scores ci-dessous calculés seulement sur les images traitées pendant cette session)"]
     if n_gt:
         p_ = n_correct / n_det if n_det else 0.0
         r_ = n_correct / n_gt
