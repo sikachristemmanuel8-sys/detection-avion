@@ -18,6 +18,7 @@ Usage : python 09_corpus_annote.py [--images data/images_detection/test] [--out 
 """
 import argparse
 import glob
+import json
 import os
 import shutil
 import time
@@ -48,6 +49,40 @@ def ecrire_xml(path, nom_image, img, dets):
             ET.SubElement(b, k).text = str(v)
     ET.indent(a)
     ET.ElementTree(a).write(path, encoding="utf-8", xml_declaration=True)
+
+
+def ecrire_json(args, images, pipe, classes):
+    """predictions.json : toutes les prédictions du corpus dans un seul fichier,
+    reconstruit à partir des .xml (donc complet même après une reprise)."""
+    res = []
+    for chemin in images:
+        xml = os.path.join(args.out, os.path.splitext(os.path.basename(chemin))[0] + ".xml")
+        racine = ET.parse(xml).getroot()
+        taille = racine.find("size")
+        avions = []
+        for o in racine.findall("object"):
+            b = o.find("bndbox")
+            avions.append({
+                "classe": o.findtext("name"),
+                "confiance_classe": float(o.findtext("confidence")),
+                "score_avion": float(o.findtext("detection_score")),
+                "boite": {k: int(float(b.findtext(k))) for k in ("xmin", "ymin", "xmax", "ymax")},
+            })
+        res.append({"image": os.path.basename(chemin),
+                    "largeur": int(taille.findtext("width")), "hauteur": int(taille.findtext("height")),
+                    "nb_avions": len(avions), "avions": avions})
+    donnees = {
+        "modele": {"detecteur": args.detecteur, "classifieur": args.classifieur,
+                   "seuil_detection": pipe.seuil, "iou_nms": pipe.iou_nms,
+                   "suppression_incluses": pipe.inclusion, "fusion_fenetres": pipe.fusion},
+        "resume": {"nb_images": len(res), "nb_avions": sum(r["nb_avions"] for r in res),
+                   "avions_par_classe": dict(sorted(classes.items(), key=lambda kv: int(kv[0][1:])))},
+        "images": res,
+    }
+    chemin_json = os.path.join(args.out, "predictions.json")
+    with open(chemin_json, "w", encoding="utf-8") as f:
+        json.dump(donnees, f, ensure_ascii=False, indent=1)
+    print(f"Fichier JSON : {os.path.abspath(chemin_json)}")
 
 
 def main():
@@ -141,6 +176,7 @@ def main():
     print("\n" + txt)
     with open(os.path.join(args.out, "resume.txt"), "w", encoding="utf-8") as f:
         f.write(txt)
+    ecrire_json(args, images, pipe, classes)
     archive = shutil.make_archive(args.out, "zip", args.out)
     print(f"Corpus dans {os.path.abspath(args.out)}\nArchive : {os.path.abspath(archive)}")
 

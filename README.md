@@ -75,6 +75,17 @@ streamlit run 08_application.py      # puis ouvrir http://localhost:8501
 
 Sous Windows, il suffit aussi de double-cliquer sur `lancer_application.bat`.
 
+## Lancer avec Docker (étape 6)
+
+Le conteneur contient tout ce qu'il faut : Python, PyTorch, le code, les modèles entraînés et les images de test avec leur vérité terrain. Il fonctionne sur Windows, Mac et Linux, avec un processeur Intel ou ARM.
+
+```bash
+docker build -t detection-avions .
+docker run -p 8501:8501 detection-avions     # puis ouvrir http://localhost:8501
+```
+
+Sous Windows, il suffit aussi de double-cliquer sur `lancer_docker.bat`, avec Docker Desktop ouvert.
+
 ## Reproduire les résultats
 
 ```bash

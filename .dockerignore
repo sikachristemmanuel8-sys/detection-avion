@@ -1,0 +1,17 @@
+# On n'envoie à Docker QUE ce dont l'application a besoin (tout est exclu, puis on réautorise).
+*
+
+!src/
+src/__pycache__
+!08_application.py
+
+# modèles utilisés par l'application : détecteurs ResNet18 et ResNet50, classifieur ResNet50
+!outputs/classification/detecteur_resnet18/best_model.pt
+!outputs/classification/detecteur_resnet50/best_model.pt
+!outputs/classification/resnet50/best_model.pt
+# réglages du post-traitement (seuil, NMS, fusion) choisis sur la validation
+!outputs/detection/detecteur_resnet18/metrics.json
+!outputs/detection/detecteur_resnet50/metrics.json
+
+# images de test + annotations XML (vérité terrain)
+!data/images_detection/test/
